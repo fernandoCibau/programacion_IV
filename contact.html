@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contacto — The Last of Us Fan Hub</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%2300e5ff' d='M8 12h48v6H8zM8 24h34v6H8zM8 36h26v6H8zM8 48h18v6H8z'/%3E%3C/svg%3E">
+  <meta name="description" content="Formulario de contacto y mapa de ubicación." />
+</head>
+<body>
+  <div class="particles-bg" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="index.html" class="brand" aria-label="Inicio">
+        <svg class="brand-logo" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 512 512">
+          <path fill="currentColor" d="M256 32c-4.3 0-8.6.3-12.8.9C138.7 40.7 48.9 130.5 40 235.2c-.3 4.2-.5 8.5-.5 12.8c0 4.3.2 8.6.5 12.8c8.9 104.7 98.7 194.5 203.2 202.3c4.2.3 8.5.5 12.8.5s8.6-.2 12.8-.5c104.5-7.8 194.3-97.6 203.2-202.3c.3-4.2.5-8.5.5-12.8s-.2-8.6-.5-12.8C463.1 130.5 373.3 40.7 268.8 32.9c-4.2-.6-8.5-.9-12.8-.9zm-12.8 48.5c100.4 7.5 178.2 85.3 185.7 185.7c.2 4.2.4 8.5.4 12.8s-.1 8.6-.4 12.8c-7.5 100.4-85.3 178.2-185.7 185.7c-4.2.2-8.5.4-12.8.4s-8.6-.1-12.8-.4C116.8 470.7 39 392.9 31.5 292.5c-.2-4.2-.4-8.5-.4-12.8s.1-8.6.4-12.8c7.5-100.4 85.3-178.2 185.7-185.7c4.2-.2 8.5-.4 12.8-.4s8.6.1 12.8.4zM256 96c-88.4 0-160 71.6-160 160s71.6 160 160 160s160-71.6 160-160s-71.6-160-160-160z"/>
+        </svg>
+        <span class="brand-text">The Last of <span class="muted">Us</span></span>
+      </a>
+      <button class="hamburger" aria-label="Abrir menú" aria-expanded="false" aria-controls="site-menu">
+        <span></span><span></span><span></span>
+      </button>
+      <nav id="site-menu" class="menu" aria-label="Principal">
+        <ul>
+          <li><a href="index.html" class="navlink">Home</a></li>
+          <li><a href="series.html" class="navlink">Serie</a></li>
+          <li><a href="gallery.html" class="navlink">Galería</a></li>
+          <li><a href="contact.html" class="navlink">Contacto</a></li>
+          <li><button class="btn theme-toggle" id="themeToggle" aria-pressed="false">Tema</button></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="contact" class="section container">
+      <div class="section-head">
+        <h2>Contacto</h2>
+        <p>Formulario de ejemplo con validación y envío simulado.</p>
+      </div>
+      <form id="contactForm" class="contact-form" novalidate>
+        <div class="grid-2">
+          <label>Nombre <input type="text" name="name" required minlength="2" placeholder="Tu nombre" /></label>
+          <label>Email <input type="email" name="email" required placeholder="tunombre@email.com" /></label>
+        </div>
+        <label>Asunto <input type="text" name="subject" required placeholder="Motivo del mensaje" /></label>
+        <label>Mensaje <textarea name="message" rows="5" required placeholder="Escribí tu mensaje..."></textarea></label>
+        <label>Tu episodio favorito
+          <select name="favEpisode" id="favEpisodeSelect"><option value="">Elegí uno...</option></select>
+        </label>
+        <label class="check">
+          <input type="checkbox" name="terms" required />
+          <span>Acepto términos y condiciones</span>
+        </label>
+        <div class="form-actions">
+          <button class="btn primary" type="submit">Enviar</button>
+          <button class="btn ghost" type="reset">Limpiar</button>
+        </div>
+        <p id="formMsg" role="status" aria-live="polite" class="form-msg" hidden></p>
+      </form>
+    </section>
+
+    <section id="map" class="section container">
+      <div class="section-head">
+        <h2>Nuestra Ubicación (Ficticia)</h2>
+        <p>Encuentra la zona de cuarentena más cercana (basada en locaciones de filmación).</p>
+      </div>
+      <div class="map-container">
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d80574.38356353943!2d-115.42413614140623!3d51.08389359114592!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x5370c5958e3def75%3A0x3625620b95934347!2sCanmore%2C%20AB%2C%20Canad%C3%A1!5e0!3m2!1ses!2sar!4v1689803310153!5m2!1ses!2sar" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Mapa de Canmore, Canada, una locación de filmación de la serie."></iframe>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-copy">&copy; 2025 &mdash; Las imágenes son propiedad de sus respectivos dueños.</div>
+      <div class="footer-credits">Desarrollado por <strong>Fernando Cibau</strong> &mdash; UTN Haedo</div>
+    </div>
+  </footer>
+
+  <script src="index.js"></script>
+</body>
+</html>
