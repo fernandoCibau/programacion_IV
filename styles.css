@@ -149,6 +149,30 @@ a:hover{text-decoration:underline}
   to { transform: translateY(-200px); }
 }
 
+/* ============ Spore Animation ============ */
+.spore-container {
+  position: absolute; /* Cambiado de fixed a absolute */
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.spore {
+  position: absolute; /* Se posicionará relativo al spore-container */
+  background: var(--accent); /* Color de la espora */
+  border-radius: 50%;
+  animation: float-spores linear infinite;
+  box-shadow: 0 0 8px 1px color-mix(in srgb, var(--accent) 50%, transparent);
+  will-change: transform;
+}
+
+@keyframes float-spores {
+  to {
+    transform: translateY(-200px); /* Animación de subida más corta */
+    opacity: 0;
+  }
+}
+
 /* ============  Header & Nav  ============ */
 .site-header{
   position: sticky; top:0; z-index:50;
@@ -435,8 +459,6 @@ a:hover{text-decoration:underline}
 .grid-2{ display:grid; gap:12px; grid-template-columns:1fr 1fr }
 @media (max-width:700px){ .grid-2{ grid-template-columns: 1fr } }
 .check{ display:flex; gap:.6rem; align-items:center }
-.form-actions{ display:flex; gap:.6rem; flex-wrap:wrap }
-.form-msg{ margin-top:10px }
 
 /* ============  Story Summary Card ============ */
 .story-card {
@@ -569,16 +591,18 @@ a:hover{text-decoration:underline}
   flex-wrap: wrap;
   gap: 12px;
 }
-.footer-credits strong {
-  font-weight: 600;
-  background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent));
-  background-size: 200% auto;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: text-shine 3s linear infinite;
+.footer-credits {  
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
 }
-@media (max-width: 700px) { .footer-inner { flex-direction: column; justify-content: center; } }
+.footer-credits img {
+  vertical-align: middle; /* Alinea la imagen con el texto */
+}
+@media (max-width: 700px) { 
+  .footer-inner { flex-direction: column; justify-content: center; } 
+  .footer-credits { justify-content: center; }
+}
 
 /* ============  Lightbox  ============ */
 .palette[open]{ display:block } /* La paleta de comandos usa display:block */
@@ -637,3 +661,108 @@ a:hover{text-decoration:underline}
 /* ============  Helpers  ============ */
 .reveal{ opacity:0; transform: translateY(10px); transition: .45s }
 .reveal.in{ opacity:1; transform:none }
+
+/* ============ Floating Actions ============ */
+.floating-actions {
+  position: fixed;
+  top: 50%;
+  left: 16px;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--card);
+  padding: 12px 8px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(255,255,255,.08);
+  z-index: 40;
+}
+.action-btn {
+  position: relative; /* Para el efecto de like */
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  transition: color .2s, background-color .2s;
+  overflow: hidden; /* Para contener el efecto */
+}
+.action-btn:hover {
+  color: var(--text);
+  background: var(--bg-soft);
+}
+.action-btn svg {
+  width: 24px;
+  height: 24px;
+}
+#likeBtn.liked {
+  color: var(--danger);
+}
+
+.like-effect {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 1rem;
+  color: var(--danger);
+  pointer-events: none;
+  opacity: 0;
+  animation: like-pop 0.6s ease-out forwards;
+}
+
+@keyframes like-pop {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -150%) scale(2.5);
+    opacity: 0;
+  }
+}
+
+/* Mini Chat */
+.mini-chat {
+  position: fixed;
+  bottom: 20px;
+  left: 80px;
+  width: 300px;
+  background: var(--card);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(255,255,255,.1);
+  padding: 16px;
+  z-index: 90;
+  transform: scale(0.95);
+  opacity: 0;
+  transition: transform .2s ease, opacity .2s ease;
+  transform-origin: bottom left;
+}
+.mini-chat.open {
+  transform: scale(1);
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .floating-actions {
+    flex-direction: row;
+    bottom: 8px;
+    left: 50%;
+    top: auto;
+    transform: translateX(-50%);
+    width: auto;
+  }
+  .mini-chat {
+    left: 10px;
+    right: 10px;
+    bottom: 80px;
+    width: auto;
+  }
+}

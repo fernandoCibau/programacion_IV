@@ -7,9 +7,8 @@ Este es un sitio web de fans de "The Last of Us" creado con HTML, CSS y JavaScri
 ## Estructura de Archivos
 
 -   `index.html`: Página de inicio con presentación, resumen de la historia y carrusel.
--   `story.html`: Página dedicada a la historia detallada de la serie.
--   `series.html`: "Hub" central para navegar a las temporadas.
--   `season-1.html`: Página con la lista de episodios de la Temporada 1.
+-   `series.html`: Página con todos los episodios de la serie.
+-   `mundo.html`: Página dedicada a la historia y el universo de la serie.
 -   `gallery.html`: Galería de imágenes con visor (lightbox).
 -   `contact.html`: Página de contacto con formulario funcional y mapa.
 -   `styles.css`: Hoja de estilos única para todo el sitio.
@@ -22,6 +21,7 @@ Este es un sitio web de fans de "The Last of Us" creado con HTML, CSS y JavaScri
 -   **Componentes Interactivos**: Carrusel, galería con lightbox, formulario funcional.
 -   **Personalización**: Tema claro/oscuro y guardado de episodios favoritos (usando `localStorage`).
 -   **Accesibilidad**: Uso de atributos ARIA y navegación por teclado.
+-   **Barra de Acciones Flotante**: Incluye contador de "Me Gusta", botón de chat y más.
 
 ## Cómo usar
 

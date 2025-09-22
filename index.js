@@ -45,6 +45,21 @@ const el = (tag, attrs={}, ...children) => {
   children.flat().forEach(c => node.append(c.nodeType ? c : document.createTextNode(c)));
   return node;
 };
+function showToast(message, type = 'info', duration = 3000) {
+  const container = $('#toast-container');
+  if (!container) return;
+
+  const toast = el('div', { class: `toast ${type}` }, message);
+  
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.add('toast-out');
+    toast.addEventListener('animationend', () => {
+      toast.remove();
+    });
+  }, duration);
+}
 
 /* ======= Dynamic Content ======= */
 (function initDynamicContent() {
@@ -74,11 +89,6 @@ const el = (tag, attrs={}, ...children) => {
   
   if (navLink) {
     navLink.classList.add('is-active');
-  } else if (currentPage === 'season-1.html') {
-    // Si estamos en una subpágina de temporada, resaltar 'Serie'
-    $('#site-menu a[href="series.html"]')?.classList.add('is-active');
-  } else if (currentPage === 'lore.html') {
-    $('#site-menu a[href="lore.html"]')?.classList.add('is-active');
   }
 })();
 
@@ -203,54 +213,25 @@ const el = (tag, attrs={}, ...children) => {
 /* ======= Seasons + Episodes (accordion + grid) ======= */
 (function initSeasons(){
   const seasonList = $('#seasonList');
-  const seasonFilter = $('#seasonFilter');
-  const episodesGrid = $('#episodesGrid'); // Para la página de temporada
+  const episodesGrid = $('#episodesGrid');
   const favSelect = $('#favEpisodeSelect');
+
+  // Mover la declaración aquí para evitar ReferenceError
+  const seasonFilter = $('#seasonFilter');
 
   if(!seasonList && !episodesGrid) return;
 
-  // Fill season filter
+  // Rellenar filtro de temporada (si existe)
   if (seasonFilter) {
     const allOption = el('option', {value:''}, 'Todas');
     seasonFilter.append(allOption);
     SERIES.seasons.forEach(s => seasonFilter.append(el('option', {value:String(s.number)}, `Temporada ${s.number} (${s.year})`)));
   }
 
-  // Render accordion
-  function renderAccordion(filter=''){
-    seasonList.innerHTML = '';
-    SERIES.seasons
-      .filter(s => !filter || String(s.number) === filter)
-      .forEach(season => {
-        const dd = el('details');
-        const sum = el('summary', {}, 
-          el('span', {class:'ttl'}, `Temporada ${season.number}`),
-          el('span', {class:'meta'}, `Año ${season.year} · ${season.episodes.length} episodios`)
-        );
-        const inner = el('div', {class:'acc-inner'});
-        season.episodes.forEach(ep => {
-          const row = el('div', {class:'episode-item'});
-          row.append(el('div', {class:'episode-index'}, ep.n));
-          const text = el('div', {}, 
-            el('h4', {class:'episode-title'}, ep.title),
-            el('span', {class:'badge'}, `${ep.runtime} min · ${ep.tag}`)
-          );
-          row.append(text);
-          const star = el('button', {class:'btn icon star', 'aria-pressed':'false', title:'Agregar a favoritos'}, '⭐');
-          star.addEventListener('click', () => toggleFav(season.number, ep.n, ep.title, star));
-          row.append(star);
-          inner.append(row);
-        });
-        dd.append(sum, inner);
-        seasonList.append(dd);
-      });
-  }
-  if (seasonList) renderAccordion();
-
   // Episodes grid (quick view)
   function renderGrid(seasonNumber){
     episodesGrid.innerHTML = '';
-    const seasonsToRender = seasonNumber ? SERIES.seasons.filter(s => s.number == seasonNumber) : SERIES.seasons;
+    const seasonsToRender = seasonNumber ? SERIES.seasons.filter(s => String(s.number) === seasonNumber) : SERIES.seasons;
     seasonsToRender.forEach(season => {
       season.episodes.forEach((ep,i) => {
         const card = el('article', {class:'card reveal'});
@@ -268,12 +249,12 @@ const el = (tag, attrs={}, ...children) => {
       });
     });
   }
-  // Si estamos en una página de temporada, renderizar su grid
-  if (episodesGrid && episodesGrid.dataset.season) {
-    renderGrid(episodesGrid.dataset.season);
+  // Si existe la grilla de episodios, la renderizamos.
+  if (episodesGrid) {
+    renderGrid(); // Renderizar todos por defecto
   }
 
-  // Fill contact favorite selector
+  // Rellenar el selector de episodios favoritos en la página de contacto
   function fillFavSelect(){
     if (!favSelect) return;
     favSelect.innerHTML = '<option value="">Elegí uno...</option>';
@@ -286,14 +267,17 @@ const el = (tag, attrs={}, ...children) => {
   fillFavSelect();
 
   // Search / Filter
-  $('#epSearch')?.addEventListener('input', e => filterEpisodes(e.target.value));
-  seasonFilter?.addEventListener('change', e => renderAccordion(e.target.value));
+  const epSearch = $('#epSearch');
+
+  epSearch?.addEventListener('input', e => filterEpisodes(e.target.value));
+  // Ahora el filtro de temporada también afecta a la grilla de episodios
+  seasonFilter?.addEventListener('change', e => renderGrid(e.target.value));
 
   function filterEpisodes(q=''){
     const norm = q.trim().toLowerCase();
-    $$('.episode-item').forEach(item => {
-      const title = item.querySelector('.episode-title')?.textContent?.toLowerCase() || '';
-      item.style.display = !norm || title.includes(norm) ? 'grid' : 'none';
+    $$('.episodes-grid .card').forEach(card => {
+      const title = card.querySelector('h3')?.textContent?.toLowerCase() || '';
+      card.style.display = !norm || title.includes(norm) ? 'block' : 'none';
     });
   }
 
@@ -314,15 +298,13 @@ const el = (tag, attrs={}, ...children) => {
   function renderFavList(){
     const box = $('#favList'); if(!box) return;
     const favs = loadFavs();
-    // Limpiar solo si la caja existe. Esto evita errores en otras páginas.
-    if (box) {
-      box.innerHTML = '';
-    } else { return; }
+    box.innerHTML = '';
 
     if(!favs.length){ box.hidden = true; return; }
     favs.forEach(f => box.append(el('div', {}, `T${f.s}E${f.n} — ${f.title}`)));
     box.hidden = false;
   }
+  renderFavList(); // Cargar al inicio en la página de series
   $('#viewFavs')?.addEventListener('click', renderFavList);
 })();
 
@@ -408,27 +390,25 @@ const el = (tag, attrs={}, ...children) => {
 /* ======= Contact Form (fake submit) ======= */
 (function initForm(){
   const form = $('#contactForm');
-  const msg = $('#formMsg');
   if(!form) return;
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if(!form.checkValidity()){
-      msg.hidden=false; msg.textContent='Revisá los campos.'; msg.style.color='var(--danger)';
+      showToast('Por favor, revisa los campos marcados.', 'error');
       form.reportValidity();
       return;
     }
-    msg.hidden=false; msg.textContent='Enviando...'; msg.style.color='var(--muted)';
+    showToast('Enviando mensaje...', 'info');
 
     // Simular envío
     await new Promise(r => setTimeout(r, 800));
     const data = Object.fromEntries(new FormData(form).entries());
-    // Guardar local
     const arr = JSON.parse(localStorage.getItem('t_messages')||'[]');
     arr.push({ ...data, at: new Date().toISOString() });
     localStorage.setItem('t_messages', JSON.stringify(arr));
 
-    msg.textContent = '¡Listo! Te responderemos pronto.'; msg.style.color='var(--accent-2)';
+    showToast('¡Listo! Te responderemos pronto.', 'success');
     form.reset();
   });
 })();
@@ -447,10 +427,9 @@ const el = (tag, attrs={}, ...children) => {
     'Ir a Home': 'index.html',
     'Ver la Serie': 'series.html',
     'Explorar Galería': 'gallery.html',
-    'Página de Contacto': 'contact.html',
-    'Leer la Historia': 'story.html',
-    'Ver Temporada 1': 'season-1.html',
-    'Explorar el Mundo (Lore)': 'lore.html',
+    'Explorar el Mundo': 'mundo.html',
+    'Contacto': 'contact.html',
+    'Activar/Desactivar Tema': () => $('#themeToggle')?.click(),
   };
 
   function renderResults(filter = '') {
@@ -461,7 +440,13 @@ const el = (tag, attrs={}, ...children) => {
       results.innerHTML = `<p style="color: var(--muted); padding: .6rem .8rem;">No se encontraron resultados.</p>`;
       return;
     }
-    results.innerHTML = filtered.map(([name, url]) => `<a href="${url}">${name}</a>`).join('');
+    results.innerHTML = ''; // Limpiar resultados
+    filtered.forEach(([name, action]) => {
+      const isFunc = typeof action === 'function';
+      const item = el('a', { href: isFunc ? '#' : action }, name);
+      if (isFunc) item.addEventListener('click', (e) => { e.preventDefault(); action(); close(); });
+      results.appendChild(item);
+    });
   }
 
   function open(){
@@ -487,6 +472,25 @@ const el = (tag, attrs={}, ...children) => {
   results.addEventListener('click', () => close());
 })();
 
+/* ======= Ambient Audio Player ======= */
+(function initAudioPlayer() {
+  const audio = $('#ambientAudio');
+  const playBtn = $('#ambientPlayBtn');
+  if (!audio || !playBtn) return;
+
+  playBtn.addEventListener('click', () => {
+    if (audio.paused) {
+      audio.play();
+      playBtn.classList.replace('icon-play', 'icon-pause');
+      playBtn.ariaLabel = "Pausar música de ambiente";
+    } else {
+      audio.pause();
+      playBtn.classList.replace('icon-pause', 'icon-play');
+      playBtn.ariaLabel = "Reproducir música de ambiente";
+    }
+  });
+})();
+
 /* ======= Reveal on scroll ======= */
 function revealOnScroll(){
   const obs = new IntersectionObserver((entries) => {
@@ -507,4 +511,131 @@ setTimeout(revealOnScroll, 0);
   splash.addEventListener('animationend', () => {
     splash.remove();
   });
+})();
+
+/* ======= Floating Actions ======= */
+(function initFloatingActions() {
+  const likeBtn = $('#likeBtn');
+  const likeCountSpan = $('#likeCount');
+  const dislikeBtn = $('#dislikeBtn');
+  const chatBtn = $('#chatBtn');
+  const shareBtn = $('#shareBtn');
+  const miniChat = $('#miniChat');
+
+  if (!likeBtn) return; // Si no existe la barra, no hacer nada
+
+  const LIKE_KEY = 't_likes';
+  const LIKED_KEY = 't_liked_this_session';
+
+  // --- Likes ---
+  function getLikes() {
+    return parseInt(localStorage.getItem(LIKE_KEY) || '42', 10);
+  }
+
+  function updateLikeDisplay() {
+    const count = getLikes();
+    likeCountSpan.textContent = count;
+    if (sessionStorage.getItem(LIKED_KEY)) {
+      likeBtn.classList.add('liked');
+      likeBtn.title = "Ya te gusta esta página";
+    }
+  }
+
+  likeBtn.addEventListener('click', () => {
+    if (sessionStorage.getItem(LIKED_KEY)) {
+      showToast('Ya te gusta esta página.', 'info');
+      return; // Solo un like por sesión
+    }
+
+    // Crear y animar el corazón
+    const heart = el('span', { class: 'like-effect' }, '❤️');
+    likeBtn.appendChild(heart);
+    heart.addEventListener('animationend', () => {
+      heart.remove();
+    });
+
+    let currentLikes = getLikes();
+    currentLikes++;
+    localStorage.setItem(LIKE_KEY, currentLikes);
+    sessionStorage.setItem(LIKED_KEY, 'true');
+    updateLikeDisplay();
+  });
+
+  // --- Dislike ---
+  dislikeBtn.addEventListener('click', () => {
+    const iconSvgPath = "M256 32c-4.3 0-8.6.3-12.8.9C138.7 40.7 48.9 130.5 40 235.2c-.3 4.2-.5 8.5-.5 12.8c0 4.3.2 8.6.5 12.8c8.9 104.7 98.7 194.5 203.2 202.3c4.2.3 8.5.5 12.8.5s8.6-.2 12.8-.5c104.5-7.8 194.3-97.6 203.2-202.3c.3-4.2.5-8.5.5-12.8s-.2-8.6-.5-12.8C463.1 130.5 373.3 40.7 268.8 32.9c-4.2-.6-8.5-.9-12.8-.9zm-12.8 48.5c100.4 7.5 178.2 85.3 185.7 185.7c.2 4.2.4 8.5.4 12.8s-.1 8.6-.4 12.8c-7.5 100.4-85.3 178.2-185.7 185.7c-4.2.2-8.5.4-12.8.4s-8.6-.1-12.8-.4C116.8 470.7 39 392.9 31.5 292.5c-.2-4.2-.4-8.5-.4-12.8s.1-8.6.4-12.8c7.5-100.4 85.3-178.2 185.7-185.7c4.2-.2 8.5-.4 12.8-.4s8.6.1 12.8.4zM256 96c-88.4 0-160 71.6-160 160s71.6 160 160 160s160-71.6 160-160s-71.6-160-160-160z";
+    const iconSvg = el('svg', { class: 'dislike-modal-icon', viewBox: '0 0 512 512' });
+    iconSvg.innerHTML = `<path fill="currentColor" d="${iconSvgPath}"/>`;
+
+    const closeBtn = el('button', { class: 'btn btn-close' }, 'Entendido');
+    const modal = el('dialog', { class: 'dislike-modal' },
+      iconSvg,
+      el('h3', {}, '¡No seas forro!'),
+      el('p', {}, 'Apreciamos tu honestidad, pero este sitio fue hecho con mucho cariño. ¡Intenta ser más constructivo!'),
+      closeBtn
+    );
+
+    function closeModal() {
+      modal.close();
+    }
+
+    closeBtn.addEventListener('click', closeModal);
+    // El evento 'close' se dispara tanto al hacer clic en el botón como al presionar ESC.
+    modal.addEventListener('close', () => modal.remove());
+
+    document.body.appendChild(modal);
+    modal.showModal();
+  });
+
+  // --- Chat ---
+  chatBtn.addEventListener('click', () => {
+    miniChat.classList.toggle('open');
+    miniChat.hidden = !miniChat.classList.contains('open');
+  });
+
+  // --- Share ---
+  shareBtn.addEventListener('click', () => {
+    showToast('¡Gracias por querer compartir! Próximamente habilitaremos esta función.', 'info');
+  });
+
+  // Init
+  updateLikeDisplay();
+})();
+
+/* ======= Spore Animation ======= */
+(function initSporeAnimation() {
+  const container = $('#spore-container');
+  if (!container) return;
+
+  const SPORE_COUNT = 50; // Cantidad de esporas en pantalla
+
+  function createSpore() {
+    const spore = el('div', { class: 'spore' });    
+    const pageHeight = document.documentElement.scrollHeight;
+
+    const size = Math.random() * 4 + 2; // Tamaño entre 2px y 6px
+    const initialX = Math.random() * 100; // Posición horizontal inicial
+    const initialY = Math.random() * pageHeight; // Posición vertical inicial a lo largo de la página
+    const duration = Math.random() * 10 + 8; // Duración entre 8s y 18s
+    const opacity = Math.random() * 0.4 + 0.3; // Opacidad entre 0.3 y 0.7
+
+    spore.style.width = `${size}px`;
+    spore.style.height = `${size}px`;
+    spore.style.left = `${initialX}vw`;
+    spore.style.top = `${initialY}px`;
+    spore.style.animationDuration = `${duration}s`;
+    spore.style.opacity = opacity;
+
+    container.appendChild(spore);
+    // Eliminar la espora cuando la animación termina para crear una nueva
+    spore.addEventListener('animationend', () => {
+      spore.remove();
+      createSpore(); // Vuelve a crear una espora para un efecto infinito
+    });
+  }
+
+  // Crear el lote inicial de esporas
+  for (let i = 0; i < SPORE_COUNT; i++) {
+    createSpore();
+  }
 })();
