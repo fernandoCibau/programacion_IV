@@ -21,13 +21,11 @@ Este es un sitio web de fans de "The Last of Us" creado con HTML, CSS y JavaScri
 -   **Componentes Interactivos**: Carrusel, galería con lightbox, formulario funcional.
 -   **Personalización**: Tema claro/oscuro y guardado de episodios favoritos (usando `localStorage`).
 -   **Accesibilidad**: Uso de atributos ARIA y navegación por teclado.
+-   **Efectos de Ambiente**: Animaciones sutiles de partículas y esporas para una mayor inmersión.
 -   **Barra de Acciones Flotante**: Incluye contador de "Me Gusta", botón de chat y más.
 
 ## Cómo usar
 
 Simplemente abre el archivo `index.html` en cualquier navegador web moderno. Todos los demás archivos están enlazados y funcionarán automáticamente.
 
-Proyecto hecho por Fernando Cibau.
-
-# programacion_IV
-# programacion_IV
+Proyecto hecho por **Fernando Cibau**.
